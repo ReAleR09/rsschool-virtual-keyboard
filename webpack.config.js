@@ -8,6 +8,9 @@ module.exports = (env, options) => {
   const isProduction = options.mode === 'production';
 
   const config = {
+    devServer: {
+      port: 8080,
+    },
     mode: isProduction ? 'production' : 'development',
     devtool: isProduction ? 'none' : 'source-map',
     watch: !isProduction,
@@ -25,7 +28,7 @@ module.exports = (env, options) => {
         template: 'index.html',
       }),
       new MiniCssExtractPlugin({
-        filename: '/css/style.css',
+        filename: 'css/style.css',
       }),
     ],
     module: {
