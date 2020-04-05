@@ -13,12 +13,35 @@ export default class Keyboard {
     this.layoutCodes = [];
     this.selectedLayoutCode = null;
     this.rootDomElement = null;
-    this.observedKeyCodes = {};
+    this.observedKeyCodes = {}; // by layout
     this.initData(langugageConfig);
+
+    this.shiftEnabled = false;
 
     container.appendChild(this.rootDomElement);
 
     this.initClicksListener();
+  }
+
+  toggleShift(enable) {
+    if (enable && !this.shiftEnabled) {
+      this.shiftEnabled = true;
+      const keys = Object.keys(this.observedKeyCodes[this.selectedLayoutCode]);
+      // eslint-disable-next-line guard-for-in, no-restricted-syntax
+      keys.forEach((keyCode) => {
+        const keyObj = this.observedKeyCodes[this.selectedLayoutCode][keyCode];
+        keyObj.setShifted(true, 'virtual-keyboard__key-shifted-true');
+      });
+    }
+    if (!enable && this.shiftEnabled) {
+      this.shiftEnabled = false;
+      const keys = Object.keys(this.observedKeyCodes[this.selectedLayoutCode]);
+      // eslint-disable-next-line guard-for-in, no-restricted-syntax
+      keys.forEach((keyCode) => {
+        const keyObj = this.observedKeyCodes[this.selectedLayoutCode][keyCode];
+        keyObj.setShifted(false, 'virtual-keyboard__key-shifted-true');
+      });
+    }
   }
 
   initClicksListener() {
@@ -42,6 +65,10 @@ export default class Keyboard {
           case 'ArrowRight':
           case 'ArrowDown':
             this.writer.navigate(code.slice(5).toLowerCase());
+            break;
+          case 'ShiftRight':
+          case 'ShiftLeft':
+            this.toggleShift(!this.shiftEnabled);
             break;
           default:
             break;
