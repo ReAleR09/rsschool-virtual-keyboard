@@ -55,24 +55,24 @@ export const functionalKeysConfig = [
       key('ShiftLeft', 'Shift'),
     ],
     right: [
-      key('ArrowUp', 'Up'),
-      key('ShiftRight', 'Shift'),
+      key('ArrowUp', 'Up', 'virtual-keyboard__key-func-arrow'),
+      key('ShiftRight', 'Shift', 'virtual-keyboard__key-func-arrow'),
     ],
   },
   // row 5 (fully functional)
   {
     left: [
-      key('ControlLeft', 'Shift'),
+      key('ControlLeft', 'Ctrl'),
       key('MetaLeft', 'Win'),
       key('AltLeft', 'Alt'),
-      key('Space', '_spacebar_'),
+      key('Space', '', 'virtual-keyboard__key-func-space'),
     ],
     right: [
       key('AltRight', 'Alt'),
       key('ControlRight', 'Ctrl'),
-      key('ArrowLeft', 'Left'),
-      key('ArrowDown', 'Down'),
-      key('ArrowRight', 'Right'),
+      key('ArrowLeft', 'Left', 'virtual-keyboard__key-func-arrow'),
+      key('ArrowDown', 'Down', 'virtual-keyboard__key-func-arrow'),
+      key('ArrowRight', 'Right', 'virtual-keyboard__key-func-arrow'),
     ],
   },
 ];

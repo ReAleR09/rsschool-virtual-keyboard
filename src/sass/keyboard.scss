@@ -1,0 +1,129 @@
+$basic-key-size: 3vw;
+$basic-key-color: #39615b;
+$basic-key-font-color: #1b2f2c;
+$func-key-color: #1b2f2c;
+$func-key-font-color: #39615b;
+$basic-key-font-size: 1.8vw;
+
+$basic-key-shadow: 5px 5px 5px 1px rgba(0, 0, 0, 0.5);
+$basic-key-shadow-pressed: 2px 2px 2px 1px rgba(0, 0, 0, 0.81);
+
+@mixin shadow($val) {
+  -webkit-box-shadow: $val;
+  -moz-box-shadow: $val;
+  box-shadow: $val;
+}
+
+.virtual-keyboard {
+  display: flex;
+
+  &__layout {
+    display: flex;
+    flex-flow: column nowrap;
+    margin: 0 auto;
+
+    &-hidden {
+      &-true {
+        display: none;
+      }
+    }
+  }
+
+  &__row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin: 0.5vh 0 0.5vh 0;
+    height: $basic-key-size;
+  }
+
+  &__key {
+    cursor: pointer;
+    background-color: $basic-key-color;
+    border-radius: 4px;
+    margin: 0 0.2rem;
+    width: $basic-key-size;
+    flex-basis: $basic-key-size;
+    flex-grow: 0;
+    color: $basic-key-font-color;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    transition: box-shadow 0.2s;
+
+    @include shadow($basic-key-shadow);
+
+    @mixin char-span($order) {
+      @if order == 0 {
+        display: none;
+      } @else {
+        display: flex;
+        position: relative;
+      }
+      
+      @if $order == 1 {
+        font-size: $basic-key-font-size - 1vw;
+        order: 1;
+        align-self: flex-start;
+        margin-left: 0.3em;
+      } @else {
+        font-size: $basic-key-font-size;
+        order: 2;
+        align-self: center;
+      }
+    }
+
+    // default show of two key-chars
+    span:nth-child(1) {
+      @include char-span(1);
+    }
+    span:nth-child(2) {
+      @include char-span(2);
+    }
+
+    &-pressed-true {
+      @include shadow($basic-key-shadow-pressed);
+    }
+
+    &-type-char {
+      span:nth-child(1) {
+        display: none;
+      }
+      span:nth-child(2) {
+        @include char-span(2);
+      }
+    }
+    // when shift pressed, swap them (only for chars)
+    &-shifted-true {
+      span:nth-child(1) {
+        margin-left: unset;
+        @include char-span(2);
+      }
+      span:nth-child(2) {
+        display: none;
+      }
+    }
+
+    &-func {
+      &-space {
+        flex-grow: 7;
+      }
+
+      &-wide {
+        background-color:$func-key-color;
+        color: $func-key-font-color;
+        flex-grow: 0.7;
+        font-size: $basic-key-font-size - 0.5vw;
+      }
+
+      &-arrow {
+        background-color:$func-key-color;
+        color: $func-key-font-color;
+        flex-grow: 0;
+      }
+      
+    }
+
+  }
+}

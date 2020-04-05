@@ -122,6 +122,6 @@ const ru = {
   ],
 };
 
-const defaultLanguagesConfig = [en, ru];
+const defaultLanguagesConfig = [ru, en];
 
 export default defaultLanguagesConfig;
