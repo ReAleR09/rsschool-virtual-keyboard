@@ -16,15 +16,31 @@ export default class Keyboard {
     this.observedKeyCodes = {}; // by layout
     this.initData(langugageConfig);
 
-    this.shiftEnabled = false;
+    this.pressedFunctionalButtons = new Set();
 
     container.appendChild(this.rootDomElement);
 
     this.initClicksListener();
   }
 
+  isShiftEnabled() {
+    return this.pressedFunctionalButtons.has('ShiftLeft') || this.pressedFunctionalButtons.has('ShiftRight');
+  }
+
   toggleShift(enable) {
-    if (enable && !this.shiftEnabled) {
+    // make sure we have right to keep shift pressed
+    if (enable === undefined) {
+      // eslint-disable-next-line no-param-reassign
+      enable = this.isShiftEnabled();
+      const keys = Object.keys(this.observedKeyCodes[this.selectedLayoutCode]);
+      // eslint-disable-next-line guard-for-in, no-restricted-syntax
+      keys.forEach((keyCode) => {
+        const keyObj = this.observedKeyCodes[this.selectedLayoutCode][keyCode];
+        keyObj.setShifted(enable, 'virtual-keyboard__key-shifted-true');
+      });
+      return;
+    }
+    if (enable && !this.isShiftEnabled()) {
       this.shiftEnabled = true;
       const keys = Object.keys(this.observedKeyCodes[this.selectedLayoutCode]);
       // eslint-disable-next-line guard-for-in, no-restricted-syntax
@@ -32,8 +48,9 @@ export default class Keyboard {
         const keyObj = this.observedKeyCodes[this.selectedLayoutCode][keyCode];
         keyObj.setShifted(true, 'virtual-keyboard__key-shifted-true');
       });
+      return;
     }
-    if (!enable && this.shiftEnabled) {
+    if (!enable && this.isShiftEnabled()) {
       this.shiftEnabled = false;
       const keys = Object.keys(this.observedKeyCodes[this.selectedLayoutCode]);
       // eslint-disable-next-line guard-for-in, no-restricted-syntax
@@ -41,6 +58,7 @@ export default class Keyboard {
         const keyObj = this.observedKeyCodes[this.selectedLayoutCode][keyCode];
         keyObj.setShifted(false, 'virtual-keyboard__key-shifted-true');
       });
+      return;
     }
   }
 
@@ -68,8 +86,14 @@ export default class Keyboard {
             break;
           case 'ShiftRight':
           case 'ShiftLeft':
-            this.toggleShift(!clickedObj.isPressed);
-            clickedObj.setPressed(this.shiftEnabled);
+            if (this.pressedFunctionalButtons.has(code)) {
+              this.pressedFunctionalButtons.delete(code);
+              clickedObj.setPressed(false);
+            } else {
+              this.pressedFunctionalButtons.add(code);
+              clickedObj.setPressed(true);
+            }
+            this.toggleShift();
             break;
           default:
             break;
