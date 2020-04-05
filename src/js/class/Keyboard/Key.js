@@ -50,7 +50,7 @@ export default class Key {
     }
   }
 
-  setPressed(isPressed, cssClass) {
+  setPressed(isPressed, cssClass = 'virtual-keyboard__key-pressed-true') {
     if (isPressed && !this.isPressed) {
       this.isPressed = true;
       this.el.classList.add(cssClass);

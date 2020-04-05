@@ -68,7 +68,8 @@ export default class Keyboard {
             break;
           case 'ShiftRight':
           case 'ShiftLeft':
-            this.toggleShift(!this.shiftEnabled);
+            this.toggleShift(!clickedObj.isPressed);
+            clickedObj.setPressed(this.shiftEnabled);
             break;
           default:
             break;
