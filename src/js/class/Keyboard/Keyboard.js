@@ -21,45 +21,90 @@ export default class Keyboard {
     container.appendChild(this.rootDomElement);
 
     this.initClicksListener();
+    this.initPhysicalKeyListener();
   }
 
   isShiftEnabled() {
     return this.pressedFunctionalButtons.has('ShiftLeft') || this.pressedFunctionalButtons.has('ShiftRight');
   }
 
-  toggleShift(enable) {
+  /**
+   * 
+   * Checks if shift keys pressed, changes state accordingly
+   */
+  toggleShift() {
     // make sure we have right to keep shift pressed
-    if (enable === undefined) {
-      // eslint-disable-next-line no-param-reassign
-      enable = this.isShiftEnabled();
-      const keys = Object.keys(this.observedKeyCodes[this.selectedLayoutCode]);
-      // eslint-disable-next-line guard-for-in, no-restricted-syntax
-      keys.forEach((keyCode) => {
-        const keyObj = this.observedKeyCodes[this.selectedLayoutCode][keyCode];
-        keyObj.setShifted(enable, 'virtual-keyboard__key-shifted-true');
-      });
-      return;
-    }
-    if (enable && !this.isShiftEnabled()) {
-      this.shiftEnabled = true;
-      const keys = Object.keys(this.observedKeyCodes[this.selectedLayoutCode]);
-      // eslint-disable-next-line guard-for-in, no-restricted-syntax
-      keys.forEach((keyCode) => {
-        const keyObj = this.observedKeyCodes[this.selectedLayoutCode][keyCode];
-        keyObj.setShifted(true, 'virtual-keyboard__key-shifted-true');
-      });
-      return;
-    }
-    if (!enable && this.isShiftEnabled()) {
-      this.shiftEnabled = false;
-      const keys = Object.keys(this.observedKeyCodes[this.selectedLayoutCode]);
-      // eslint-disable-next-line guard-for-in, no-restricted-syntax
-      keys.forEach((keyCode) => {
-        const keyObj = this.observedKeyCodes[this.selectedLayoutCode][keyCode];
-        keyObj.setShifted(false, 'virtual-keyboard__key-shifted-true');
-      });
-      return;
-    }
+    const enable = this.isShiftEnabled();
+
+    const keys = Object.keys(this.observedKeyCodes[this.selectedLayoutCode]);
+    // eslint-disable-next-line guard-for-in, no-restricted-syntax
+    keys.forEach((keyCode) => {
+      const keyObj = this.observedKeyCodes[this.selectedLayoutCode][keyCode];
+      keyObj.setShifted(enable, 'virtual-keyboard__key-shifted-true');
+    });
+  }
+
+  initPhysicalKeyListener() {
+    const handle = (e) => {
+      e.preventDefault();
+      const { repeat, type, code } = e;
+      const pressed = (type !== 'keyup');
+      // changing button's press state
+      const keyObj = this.observedKeyCodes[this.selectedLayoutCode][code];
+      if (!keyObj) {
+        // Such key is not observed by this layout
+        return;
+      }
+      // keydown will repeat over and over again while pressed, no need to update the state
+      if (!repeat) {
+        keyObj.setPressed(pressed);
+      }
+      if (functionKeysCodes.includes(code)) {
+        switch (code) {
+          case 'Backspace':
+            this.writer.backspace();
+            break;
+          case 'Delete':
+            this.writer.backspace(true);
+            break;
+          case 'Space':
+            this.writer.write(' ');
+            break;
+          case 'Enter':
+            this.writer.write('\n');
+            break;
+          case 'Tab':
+            this.writer.write('\t');
+            break;
+          case 'ArrowLeft':
+          case 'ArrowUp':
+          case 'ArrowRight':
+          case 'ArrowDown':
+            this.writer.navigate(code.slice(5).toLowerCase());
+            break;
+          case 'ShiftRight':
+          case 'ShiftLeft':
+          case 'AltLeft':
+          case 'AltRight':
+          case 'ControlLeft':
+          case 'ControlRight':
+            if (pressed) {
+              this.pressedFunctionalButtons.add(code);
+            } else {
+              this.pressedFunctionalButtons.delete(code);
+            }
+            this.checkLayoutToggleCombo(code);
+            this.toggleShift();
+            break;
+          default:
+            break;
+        }
+      } else {
+        this.writer.write(keyObj.getValue());
+      }
+    };
+    document.onkeydown = handle;
+    document.onkeyup = handle;
   }
 
   initClicksListener() {
@@ -80,6 +125,9 @@ export default class Keyboard {
           case 'Enter':
             this.writer.write('\n');
             break;
+          case 'Tab':
+            this.writer.write('\t');
+            break;
           case 'ArrowLeft':
           case 'ArrowUp':
           case 'ArrowRight':
@@ -92,7 +140,7 @@ export default class Keyboard {
           case 'AltRight':
           case 'ControlLeft':
           case 'ControlRight':
-            this.clickToToggleIsPressed(code, clickedObj);
+            this.funcKeyPressedToggleByKeyCode(code);
             this.toggleShift();
             break;
           default:
@@ -105,7 +153,8 @@ export default class Keyboard {
     });
   }
 
-  clickToToggleIsPressed(code, clickedObj) {
+  funcKeyPressedToggleByKeyCode(code) {
+    const clickedObj = this.observedKeyCodes[this.selectedLayoutCode][code];
     if (this.pressedFunctionalButtons.has(code)) {
       this.pressedFunctionalButtons.delete(code);
       clickedObj.setPressed(false);
@@ -136,8 +185,7 @@ export default class Keyboard {
     }
 
     if (this.pressedFunctionalButtons.has(pairCode)) {
-      const pairKeyObj = this.observedKeyCodes[this.selectedLayoutCode][pairCode];
-      this.clickToToggleIsPressed(pairCode, pairKeyObj);
+      this.funcKeyPressedToggleByKeyCode(pairCode);
       this.nextLayout();
       layoutToggled = true;
     }
@@ -187,8 +235,7 @@ export default class Keyboard {
 
     // first, "unclick" functional buttons
     this.pressedFunctionalButtons.forEach((keyCode) => {
-      const keyObj = this.observedKeyCodes[this.selectedLayoutCode][keyCode];
-      this.clickToToggleIsPressed(keyCode, keyObj);
+      this.funcKeyPressedToggleByKeyCode(keyCode);
     });
     // and unshift keys
     this.toggleShift();
