@@ -5,6 +5,10 @@ $func-key-color: #1b2f2c;
 $func-key-font-color: #39615b;
 $basic-key-font-size: 1.8vw;
 
+$ripple-color: #f0f8ff;
+$outline: #f0f8ff 3px auto;
+$outline-pressed: #bfd0df 3px auto;
+
 $basic-key-shadow: 5px 5px 5px 1px rgba(0, 0, 0, 0.5);
 $basic-key-shadow-pressed: 2px 2px 2px 1px rgba(0, 0, 0, 0.81);
 
@@ -14,8 +18,24 @@ $basic-key-shadow-pressed: 2px 2px 2px 1px rgba(0, 0, 0, 0.81);
   box-shadow: $val;
 }
 
+@mixin rippleColor($hex) {
+  background-image: radial-gradient(circle, transparent 1%, $ripple-color 1%);
+  background-position-x: center;
+  background-position-y: center;
+  background-size: 15000%;
+  background-attachment: initial;
+  background-origin: initial;
+  background-clip: initial;
+  background-color: $hex;
+}
+
 .virtual-keyboard {
   display: flex;
+
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
 
   &__layout {
     display: flex;
@@ -39,7 +59,11 @@ $basic-key-shadow-pressed: 2px 2px 2px 1px rgba(0, 0, 0, 0.81);
 
   &__key {
     cursor: pointer;
-    background-color: $basic-key-color;
+    // tricky one
+    @include rippleColor($basic-key-color);
+    background-position: center;
+    transition: background 0.6s, box-shadow 0.2s, outline 0.2s;
+
     border-radius: 4px;
     margin: 0 0.2rem;
     width: $basic-key-size;
@@ -50,7 +74,6 @@ $basic-key-shadow-pressed: 2px 2px 2px 1px rgba(0, 0, 0, 0.81);
     justify-content: center;
     align-items: center;
     display: flex;
-    transition: box-shadow 0.2s, outline 0.2s;
     outline: aliceblue 3px auto;
 
     @include shadow($basic-key-shadow);
@@ -118,18 +141,25 @@ $basic-key-shadow-pressed: 2px 2px 2px 1px rgba(0, 0, 0, 0.81);
       }
 
       &-wide {
-        background-color:$func-key-color;
+        @include rippleColor($func-key-color);
         color: $func-key-font-color;
         flex-grow: 0.7;
         font-size: $basic-key-font-size - 0.5vw;
       }
 
       &-arrow {
-        background-color:$func-key-color;
+        @include rippleColor($func-key-color);
         color: $func-key-font-color;
         flex-grow: 0;
       }
       
+    }
+
+    &-animation-click {
+      @include shadow($basic-key-shadow-pressed);
+      background-color: $ripple-color;
+      background-size: 100%;
+      transition: background 0s;
     }
 
   }

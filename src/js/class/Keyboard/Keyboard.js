@@ -29,7 +29,7 @@ export default class Keyboard {
   }
 
   /**
-   * 
+   *
    * Checks if shift keys pressed, changes state accordingly
    */
   toggleShift() {
@@ -58,29 +58,33 @@ export default class Keyboard {
       // keydown will repeat over and over again while pressed, no need to update the state
       if (!repeat) {
         keyObj.setPressed(pressed);
+        // animate
+        if (pressed) {
+          keyObj.pressAnimatation();
+        }
       }
       if (functionKeysCodes.includes(code)) {
         switch (code) {
           case 'Backspace':
-            this.writer.backspace();
+            if (pressed) this.writer.backspace();
             break;
           case 'Delete':
-            this.writer.backspace(true);
+            if (pressed) this.writer.backspace(true);
             break;
           case 'Space':
-            this.writer.write(' ');
+            if (pressed) this.writer.write(' ');
             break;
           case 'Enter':
-            this.writer.write('\n');
+            if (pressed) this.writer.write('\n');
             break;
           case 'Tab':
-            this.writer.write('\t');
+            if (pressed) this.writer.write('\t');
             break;
           case 'ArrowLeft':
           case 'ArrowUp':
           case 'ArrowRight':
           case 'ArrowDown':
-            this.writer.navigate(code.slice(5).toLowerCase());
+            if (pressed) this.writer.navigate(code.slice(5).toLowerCase());
             break;
           case 'ShiftRight':
           case 'ShiftLeft':
@@ -99,7 +103,7 @@ export default class Keyboard {
           default:
             break;
         }
-      } else {
+      } else if (pressed) {
         this.writer.write(keyObj.getValue());
       }
     };
@@ -110,6 +114,9 @@ export default class Keyboard {
   initClicksListener() {
     this.rootDomElement.addEventListener(KEYBOARD_CLICK_EVENT, (e) => {
       const clickedObj = e.detail.keyObj;
+      // animate
+      clickedObj.pressAnimatation();
+
       const { code } = clickedObj;
       if (functionKeysCodes.includes(code)) {
         switch (code) {
@@ -181,7 +188,7 @@ export default class Keyboard {
         pairCode = 'AltRight';
         break;
       default:
-        break;
+        return false;
     }
 
     if (this.pressedFunctionalButtons.has(pairCode)) {

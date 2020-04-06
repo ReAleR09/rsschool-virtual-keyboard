@@ -59,4 +59,9 @@ export default class Key {
       this.el.classList.remove(cssClass);
     }
   }
+
+  pressAnimatation(cssClass = 'virtual-keyboard__key-animation-click') {
+    this.el.classList.add(cssClass);
+    setTimeout(() => {this.el.classList.remove(cssClass);}, 0);
+  }
 }
