@@ -67,7 +67,6 @@ export default class Keyboard {
       const clickedObj = e.detail.keyObj;
       const { code } = clickedObj;
       if (functionKeysCodes.includes(code)) {
-        console.log('Functional key clicked');
         switch (code) {
           case 'Backspace':
             this.writer.backspace();
@@ -78,6 +77,9 @@ export default class Keyboard {
           case 'Space':
             this.writer.write(' ');
             break;
+          case 'Enter':
+            this.writer.write('\n');
+            break;
           case 'ArrowLeft':
           case 'ArrowUp':
           case 'ArrowRight':
@@ -86,13 +88,11 @@ export default class Keyboard {
             break;
           case 'ShiftRight':
           case 'ShiftLeft':
-            if (this.pressedFunctionalButtons.has(code)) {
-              this.pressedFunctionalButtons.delete(code);
-              clickedObj.setPressed(false);
-            } else {
-              this.pressedFunctionalButtons.add(code);
-              clickedObj.setPressed(true);
-            }
+          case 'AltLeft':
+          case 'AltRight':
+          case 'ControlLeft':
+          case 'ControlRight':
+            this.clickToToggleIsPressed(code, clickedObj);
             this.toggleShift();
             break;
           default:
@@ -100,10 +100,49 @@ export default class Keyboard {
         }
       } else {
         const char = clickedObj.getValue();
-        console.log('Non-functional key clicked');
         this.writer.write(char);
       }
     });
+  }
+
+  clickToToggleIsPressed(code, clickedObj) {
+    if (this.pressedFunctionalButtons.has(code)) {
+      this.pressedFunctionalButtons.delete(code);
+      clickedObj.setPressed(false);
+    } else if (!this.checkLayoutToggleCombo(code)) {
+      this.pressedFunctionalButtons.add(code);
+      clickedObj.setPressed(true);
+    }
+  }
+
+  checkLayoutToggleCombo(code) {
+    let layoutToggled = false;
+    let pairCode = false;
+    switch (code) {
+      case 'AltLeft':
+        pairCode = 'ControlLeft';
+        break;
+      case 'AltRight':
+        pairCode = 'ControlRight';
+        break;
+      case 'ControlLeft':
+        pairCode = 'AltLeft';
+        break;
+      case 'ControlRight':
+        pairCode = 'AltRight';
+        break;
+      default:
+        break;
+    }
+
+    if (this.pressedFunctionalButtons.has(pairCode)) {
+      const pairKeyObj = this.observedKeyCodes[this.selectedLayoutCode][pairCode];
+      this.clickToToggleIsPressed(pairCode, pairKeyObj);
+      this.nextLayout();
+      layoutToggled = true;
+    }
+
+    return layoutToggled;
   }
 
   initData(langugageConfig) {
@@ -113,12 +152,9 @@ export default class Keyboard {
     this.nextLayout(true);
     this.layoutCodes.forEach((code) => {
       const layoutDom = this.layouts[code];
-      layoutDom.classList.add('virtual-keyboard__layout');
-      if (code !== this.selectedLayoutCode) {
-        layoutDom.classList.add('virtual-keyboard__layout-hidden-true');
-      }
       this.rootDomElement.appendChild(layoutDom);
     });
+    this.displayCurrentLayout();
   }
 
   /**
@@ -149,6 +185,14 @@ export default class Keyboard {
       return;
     }
 
+    // first, "unclick" functional buttons
+    this.pressedFunctionalButtons.forEach((keyCode) => {
+      const keyObj = this.observedKeyCodes[this.selectedLayoutCode][keyCode];
+      this.clickToToggleIsPressed(keyCode, keyObj);
+    });
+    // and unshift keys
+    this.toggleShift();
+
     const index = this.layoutCodes.indexOf(this.selectedLayoutCode);
     if (index + 1 === this.layoutCodes.length) {
       // end of list, back to first
@@ -156,10 +200,24 @@ export default class Keyboard {
       this.selectedLayoutCode = layoutCode;
     } else {
       // get next available code
-      const layoutCode = this.layoutCodes[index];
+      const layoutCode = this.layoutCodes[index + 1];
       this.selectedLayoutCode = layoutCode;
     }
     localStorage.setItem('layout', this.selectedLayoutCode);
+    this.displayCurrentLayout();
+  }
+
+  displayCurrentLayout() {
+    // hide all layouts except current
+    this.layoutCodes.forEach((code) => {
+      const layoutDom = this.layouts[code];
+      layoutDom.classList.add('virtual-keyboard__layout');
+      if (code !== this.selectedLayoutCode) {
+        layoutDom.classList.add('virtual-keyboard__layout-hidden-true');
+      } else {
+        layoutDom.classList.remove('virtual-keyboard__layout-hidden-true');
+      }
+    });
   }
 
   generateLayouts(langugageConfig) {
