@@ -65,7 +65,7 @@ const ru = {
   lang: 'ru',
   keys: [
     [
-      key('Backquote', 'ё', 'Ё'),
+      key('Backquote', 'ё'),
       key('Digit1', '1', '!'),
       key('Digit2', '2', '"'),
       key('Digit3', '3', '№'),

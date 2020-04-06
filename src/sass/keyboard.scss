@@ -50,7 +50,8 @@ $basic-key-shadow-pressed: 2px 2px 2px 1px rgba(0, 0, 0, 0.81);
     justify-content: center;
     align-items: center;
     display: flex;
-    transition: box-shadow 0.2s;
+    transition: box-shadow 0.2s, outline 0.2s;
+    outline: aliceblue 3px auto;
 
     @include shadow($basic-key-shadow);
 
@@ -59,7 +60,6 @@ $basic-key-shadow-pressed: 2px 2px 2px 1px rgba(0, 0, 0, 0.81);
         display: none;
       } @else {
         display: flex;
-        position: relative;
       }
       
       @if $order == 1 {
@@ -67,10 +67,15 @@ $basic-key-shadow-pressed: 2px 2px 2px 1px rgba(0, 0, 0, 0.81);
         order: 1;
         align-self: flex-start;
         margin-left: 0.3em;
+        margin-top: 0.3em;
       } @else {
+        line-height: 0.5em;
         font-size: $basic-key-font-size;
         order: 2;
-        align-self: center;
+        align-self: flex-end;
+        margin-right: 0.2em;
+        
+        margin-bottom: 0.2em;
       }
     }
 
@@ -84,11 +89,12 @@ $basic-key-shadow-pressed: 2px 2px 2px 1px rgba(0, 0, 0, 0.81);
 
     &-pressed-true {
       @include shadow($basic-key-shadow-pressed);
+      outline: red 3px auto;
     }
 
     &-type-char {
       span:nth-child(1) {
-        display: none;
+        opacity: 0;
       }
       span:nth-child(2) {
         @include char-span(2);
@@ -97,11 +103,12 @@ $basic-key-shadow-pressed: 2px 2px 2px 1px rgba(0, 0, 0, 0.81);
     // when shift pressed, swap them (only for chars)
     &-shifted-true {
       span:nth-child(1) {
-        margin-left: unset;
+        opacity: 1;
         @include char-span(2);
       }
       span:nth-child(2) {
-        display: none;
+        opacity: 0;
+        @include char-span(1);
       }
     }
 
