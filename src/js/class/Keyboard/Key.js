@@ -32,21 +32,27 @@ export default class Key {
   }
 
   getValue() {
-    if (this.shiftCharacter === true && this.isShifted === true) {
-      return this.char.toUpperCase();
+    if (this.isShifted === true) {
+      if (this.shiftCharacter === true) {
+        return this.char.toUpperCase();
+      }
+      return this.shiftCharacter;
     }
+
     return this.char;
   }
 
   setShifted(isShifted, cssClass) {
-    if (this.shiftCharacter !== true) return;
-
     if (isShifted && !this.isShifted) {
       this.isShifted = true;
-      this.el.classList.add(cssClass);
+      if (this.shiftCharacter === true) {
+        this.el.classList.add(cssClass);
+      }
     } else if (!isShifted && this.isShifted) {
       this.isShifted = false;
-      this.el.classList.remove(cssClass);
+      if (this.shiftCharacter === true) {
+        this.el.classList.remove(cssClass);
+      }
     }
   }
 
