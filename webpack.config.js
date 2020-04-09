@@ -36,12 +36,24 @@ module.exports = (env, options) => {
         {
           test: /\.?js$/,
           exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              presets: ['@babel/preset-env'],
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                presets: ['@babel/preset-env'],
+              },
             },
-          },
+            {
+              loader: 'eslint-loader',
+              options: {
+                cache: true,
+                emitError: true,
+                failOnError: true,
+                emitWarning: true,
+                failOnWarning: false,
+              },
+            },
+          ],
         },
         {
           test: /\.scss$/,

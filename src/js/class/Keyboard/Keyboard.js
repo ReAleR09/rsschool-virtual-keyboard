@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable class-methods-use-this */
 import defaultLanguagesConfig from './default-languages-config';
 import { functionKeysCodes, functionalKeysConfig } from './functional-keys-config';
 import Key from './Key';
