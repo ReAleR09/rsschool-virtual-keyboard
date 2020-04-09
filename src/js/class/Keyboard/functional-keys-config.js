@@ -23,6 +23,8 @@ export const functionKeysCodes = [
   'MetaRight',
 ];
 
+const funcSmallKeyCssClass = 'virtual-keyboard__key-func-arrow';
+
 // Thankfully, all functional keys are placed on the edges of key rows,
 export const functionalKeysConfig = [
   // row 1 (with numbers)
@@ -55,8 +57,8 @@ export const functionalKeysConfig = [
       key('ShiftLeft', 'Shift'),
     ],
     right: [
-      key('ArrowUp', 'Up', 'virtual-keyboard__key-func-arrow'),
-      key('ShiftRight', 'Shift', 'virtual-keyboard__key-func-arrow'),
+      key('ArrowUp', 'Up', funcSmallKeyCssClass),
+      key('ShiftRight', 'Shift', funcSmallKeyCssClass),
     ],
   },
   // row 5 (fully functional)
@@ -70,9 +72,9 @@ export const functionalKeysConfig = [
     right: [
       key('AltRight', 'Alt'),
       key('ControlRight', 'Ctrl'),
-      key('ArrowLeft', 'Left', 'virtual-keyboard__key-func-arrow'),
-      key('ArrowDown', 'Down', 'virtual-keyboard__key-func-arrow'),
-      key('ArrowRight', 'Right', 'virtual-keyboard__key-func-arrow'),
+      key('ArrowLeft', 'Left', funcSmallKeyCssClass),
+      key('ArrowDown', 'Down', funcSmallKeyCssClass),
+      key('ArrowRight', 'Right', funcSmallKeyCssClass),
     ],
   },
 ];
