@@ -5,16 +5,20 @@ import { KEYBOARD_CLICK_EVENT } from './utils';
 import OutputWriter from './OutputWriter';
 
 export default class Keyboard {
-  constructor(container, output, langugageConfig = defaultLanguagesConfig) {
-    this.writer = new OutputWriter(output);
+  constructor(languageConfig = defaultLanguagesConfig) {
     this.layouts = {};
     this.layoutCodes = [];
     this.selectedLayoutCode = null;
     this.rootDomElement = null;
     this.observedKeyCodes = {}; // by layout
-    this.initData(langugageConfig);
+    this.languageConfig = languageConfig;
 
     this.pressedFunctionalButtons = new Set();
+  }
+
+  attach(container, output) {
+    this.writer = new OutputWriter(output);
+    this.initData(this.languageConfig);
 
     container.appendChild(this.rootDomElement);
 
@@ -30,9 +34,9 @@ export default class Keyboard {
    *
    * Checks if shift keys pressed, changes state accordingly
    */
-  toggleShift() {
+  toggleShift(forceDisable = false) {
     // make sure we have right to keep shift pressed
-    const enable = this.isShiftEnabled();
+    const enable = forceDisable ? false : this.isShiftEnabled();
 
     const keys = Object.keys(this.observedKeyCodes[this.selectedLayoutCode]);
     // eslint-disable-next-line guard-for-in, no-restricted-syntax
@@ -94,8 +98,9 @@ export default class Keyboard {
               this.pressedFunctionalButtons.add(code);
             } else {
               this.pressedFunctionalButtons.delete(code);
+              this.checkLayoutToggleCombo(code, false);
             }
-            this.checkLayoutToggleCombo(code);
+
             this.toggleShift();
             break;
           default:
@@ -169,7 +174,7 @@ export default class Keyboard {
     }
   }
 
-  checkLayoutToggleCombo(code) {
+  checkLayoutToggleCombo(code, toggle = true) {
     let layoutToggled = false;
     let pairCode = false;
     switch (code) {
@@ -190,7 +195,10 @@ export default class Keyboard {
     }
 
     if (this.pressedFunctionalButtons.has(pairCode)) {
-      this.funcKeyPressedToggleByKeyCode(pairCode);
+      if (toggle) {
+        this.funcKeyPressedToggleByKeyCode(pairCode);
+      }
+
       this.nextLayout();
       layoutToggled = true;
     }
@@ -238,12 +246,14 @@ export default class Keyboard {
       return;
     }
 
-    // first, "unclick" functional buttons
+    // copy pressed buttons set
+    const pressedFunctionalButtons = new Set(this.pressedFunctionalButtons);
+    // "unpress" old buttons
     this.pressedFunctionalButtons.forEach((keyCode) => {
       this.funcKeyPressedToggleByKeyCode(keyCode);
     });
     // and unshift keys
-    this.toggleShift();
+    this.toggleShift(true);
 
     const index = this.layoutCodes.indexOf(this.selectedLayoutCode);
     if (index + 1 === this.layoutCodes.length) {
@@ -257,6 +267,16 @@ export default class Keyboard {
     }
     localStorage.setItem('layout', this.selectedLayoutCode);
     this.displayCurrentLayout();
+
+    // restore pressed state
+    this.pressedFunctionalButtons = pressedFunctionalButtons;
+    // restore press state for func buttons in the new layout
+    this.pressedFunctionalButtons.forEach((keyCode) => {
+      const keyObj = this.observedKeyCodes[this.selectedLayoutCode][keyCode];
+      keyObj.setPressed(true);
+    });
+    // and check shift state
+    this.toggleShift();
   }
 
   displayCurrentLayout() {
@@ -274,14 +294,14 @@ export default class Keyboard {
 
   generateLayouts(langugageConfig) {
     langugageConfig.forEach((lang) => {
-      const [langDomEl, langObservedKeyCodes] = this.createLangLayout(lang);
+      const [langDomEl, langObservedKeyCodes] = this.constructor.createLangLayout(lang);
       this.layouts[lang.lang] = langDomEl;
       this.observedKeyCodes[lang.lang] = langObservedKeyCodes;
       this.layoutCodes.push(lang.lang);
     });
   }
 
-  createLangLayout(langugageConfig) {
+  static createLangLayout(langugageConfig) {
     const langDomElement = document.createElement('div');
     const langObservedKeyCodes = {};
     let rowNum = 0;

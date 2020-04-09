@@ -1,8 +1,8 @@
-export function buildKeyObject(keyCode, keyValue, keyShiftValue = true) {
+export function buildKeyObject(code, value, shift = true) {
   return {
-    code: keyCode,
-    value: keyValue,
-    shift: keyShiftValue,
+    code,
+    value,
+    shift,
   };
 }
 

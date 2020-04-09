@@ -1,11 +1,6 @@
 import { KEYBOARD_CLICK_EVENT } from './utils';
 
 export default class Key {
-  /**
-   *
-   * @param String character
-   * @param {boolean, String} shiftCharacter - true if it just uppercases the character
-   */
   constructor(domElement, code, character = false, shiftCharacter = false) {
     this.isShifted = false;
     this.isPressed = false;
@@ -68,6 +63,6 @@ export default class Key {
 
   pressAnimatation(cssClass = 'virtual-keyboard__key-animation-click') {
     this.el.classList.add(cssClass);
-    setTimeout(() => {this.el.classList.remove(cssClass);}, 0);
+    setTimeout(() => { this.el.classList.remove(cssClass); }, 0);
   }
 }

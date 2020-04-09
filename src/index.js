@@ -10,7 +10,8 @@ function onload() {
   const outputEl = document.getElementById('output');
   const keyboardContainer = document.getElementById('keyboard');
 
-  const keyboard = new Keyboard(keyboardContainer, outputEl);
+  const keyboard = new Keyboard();
+  keyboard.attach(keyboardContainer, outputEl);
 }
 
 window.onload = onload;
