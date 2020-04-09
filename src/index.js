@@ -3,7 +3,7 @@ import Keyboard from './js/class/Keyboard/Keyboard';
 function onload() {
   const wrapper = document.createElement('div');
   wrapper.classList.add('wrapper');
-  wrapper.innerHTML = '<div class="output"><textarea id="output" class="output__textarea">Смена раскладки - Ctrl+Alt</textarea></div><div id="keyboard"></div>';
+  wrapper.innerHTML = '<div class="output"><textarea placeholder="Смена раскладки - Ctrl+Alt" id="output" class="output__textarea"></textarea></div><div id="keyboard"></div>';
 
   document.body.prepend(wrapper);
 
